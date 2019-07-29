@@ -30,7 +30,7 @@ typedef unsigned __int32 uint32_t;
 #endif
 
 #define JSON_MAJOR 	1
-#define JSON_MINOR	0
+#define JSON_MINOR	1
 #define JSON_VERSION	(JSON_MAJOR * 100 + JSON_MINOR)
 
 typedef enum 
@@ -96,8 +96,8 @@ typedef enum
 	IN_PLACE
 } json_parsing_mode;
 
-#define LIBJSON_DEFAULT_STACK_SIZE 256
-#define LIBJSON_DEFAULT_BUFFER_SIZE 4096
+#define LIBJSON_DEFAULT_STACK_SIZE 64
+#define LIBJSON_DEFAULT_BUFFER_SIZE 1024
 #define ESCAPE_BUFFER_SIZE 6
 
 typedef int (*json_parser_callback)(void *userdata, int type, const char *data, uint32_t length);

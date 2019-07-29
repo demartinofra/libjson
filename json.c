@@ -60,7 +60,7 @@ enum classes {
 };
 
 /* map from character < 128 to classes. from 128 to 256 all C_OTHER */
-static uint8_t character_class[128] = {
+static const uint8_t character_class[128] = {
 	C_ERROR, C_ERROR, C_ERROR, C_ERROR, C_ERROR, C_ERROR, C_ERROR, C_ERROR,
 	C_ERROR, C_WHITE, C_NL,    C_ERROR, C_ERROR, C_WHITE, C_ERROR, C_ERROR,
 	C_ERROR, C_ERROR, C_ERROR, C_ERROR, C_ERROR, C_ERROR, C_ERROR, C_ERROR,
@@ -83,7 +83,7 @@ static uint8_t character_class[128] = {
 };
 
 /* only the first 36 ascii characters need an escape */
-static char const *character_escape[] = {
+static char const * const character_escape[] = {
 	"\\u0000", "\\u0001", "\\u0002", "\\u0003", "\\u0004", "\\u0005", "\\u0006", "\\u0007", /*  0-7  */
 	"\\b"    ,     "\\t",     "\\n", "\\u000b",     "\\f",     "\\r", "\\u000e", "\\u000f", /*  8-f  */
 	"\\u0010", "\\u0011", "\\u0012", "\\u0013", "\\u0014", "\\u0015", "\\u0016", "\\u0017", /* 10-17 */
@@ -228,7 +228,7 @@ static const uint8_t state_transition_table[NR_STATES][NR_CLASSES] = {
 /*N2*/ PT_(__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,N3,__,__,__,__,__,__,__,__,__,__),
 /*N3*/ PT_(__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,NU,__,__,__,__,__,__,__,__,__,__),
 /****************************************************************************************************************/
-/*C1*/ PT_(__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,C2,__),
+/*C1*/ PT_(__,__,__,__,__,__,__,__,__,__,__,YB,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,C2,__),
 /*C2*/ PT_(C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C3,C2),
 /*C3*/ PT_(C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,CE,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C2,C3,C2),
 /*Y1*/ PT_(Y1,CE,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1,Y1),
@@ -636,7 +636,8 @@ static int act_yb(json_parser *parser)
 {
 	if (!parser->config.allow_yaml_comments)
 		return JSON_ERROR_COMMENT_NOT_ALLOWED;
-	parser->save_state = parser->state;
+	if(parser->state != STATE_C1)
+		parser->save_state = parser->state;
 	return 0;
 }
 
@@ -784,7 +785,7 @@ static int do_action(json_parser *parser, int next_state)
 {
 	struct action_descr *descr = &actions_map[next_state & ~0x80];
 
-	if (descr->dobuffer && parser->type != JSON_NONE)
+	if (descr->dobuffer && parser->type > JSON_NONE)
 		CHK(do_callback_withbuf(parser, parser->type));
 
 	if (descr->call)
